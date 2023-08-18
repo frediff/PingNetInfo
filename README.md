@@ -1,2 +1,20 @@
-# PingNetInfo
-A program that will take a site address and find the route and estimate the latency and bandwidth of each link in the path
+# Ping Network Info - Project Description
+
+### The repository for the project is available at https://github.com/frediff/GML
+
+## PingNetInfo 
+
+<p align="justify">In this project, we write a program called PingNetInfo that will take a site address, find the route, and estimate the latency and bandwidth of each link in the path.</p>
+
+<p align="justify">We define the latency of a link as the time to send a 0-length message on the length. It represents the time needed to process a packet even if there is no data, as there will still be some time to process headers. The bandwidth of a link can be estimated by sending two packets with different amounts of data in it and measuring the time it takes. Since both will incur almost the same latency, the difference in time is due to the processing of different amounts of data. We use this to estimate the bandwidth of the link.</p>
+
+<p align="justify">PingNetInfo does this by probing by sending ICMP packets. PingNetInfo takes three arguments: a site to probe (can be either a name like cse.iitkgp.ac.in or an IP address like 10.3.45.6), the number of times we send a probe per link (n), and the time difference between any two probes (T). The program works as follows. If the site parameter is a name, it first calls gethostbyname() to get an IP address corresponding to it. It then creates a raw socket to send and receive ICMP packets. It then goes ahead to find the path to the site given. The idea is similar to how the traceroute tool works but differing in the fact that we will not find the entire path together; instead, we will find each link in the path, estimate the latency and bandwidth of the link, print it, and then go to the following link. For example, suppose the site we are probing is P from the local m/c L, and from the local machine, the route is through nodes X, Y, and Z (so the path is of length 4, L-X, X-Y, Y-Z, Z-P). Our program will first discover node X, and estimate and print the latency and bandwidth of the link L-X, then find node Y and estimate and print the latency and bandwidth of the link X-Y, and continue similarly until node P. Note that L does not know the full path initially; it has to discover the intermediate nodes.</p>
+
+<p align="justify">To discover the intermediate nodes, we use the same concept as in traceroute (its description is on the internet in many places). Before finalizing it, we send at least 5 ICMP packets with proper headers, each 1 second apart, per intermediate node. We send ping ICMP packets with different amounts of data to Y to estimate the latency and bandwidth of an intermediate link X-Y. For each data size, we send n pings, each T seconds apart. We use the RTT measurements and the data sizes to estimate the latency and bandwidth. The program handles various possibilities, like dropping any packet, two requests may reach their destinations out of order, more than one request may be on its way before a response to any one of them comes back, and some intermediate servers will not respond to pings. Note that if a node does not send responses to ICMP packets, we cannot get its IP or any other link information; however,  we handle the case nicely, and the program does not hang/crash and prints out the relevant messages. The program obtains all feasible information until the final node, even if it cannot find information about some nodes/links in the middle.</p>
+
+<p align="justify">For every ICMP packet sent and received (this can be packets not relevant for us also), the program prints out the header fields in an easy-to-understand format. Additionally, for any ICMP packet received that is not an Echo Request/reply or Time Exceeded, the program also checks the data part to see if there is any data, and if so, we print out the IP header and the next-level protocol header fields (like TCP/UDP and others that is whatever the IP packet dropped was carrying). Since we have added support for TCP and UDP only, the program prints a message saying unknown protocol if the protocol field has anything else.</p>
+
+#### Contributors
+
+- Subham Ghosh (Roll No.: 20CS10065)
+- Anubhav Dhar (Roll No.: 20CS30004)
